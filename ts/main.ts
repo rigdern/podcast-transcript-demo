@@ -494,22 +494,40 @@ function dialogueContainsTime(dialogue: IDialogueWithEnd, time: number): boolean
   return isFloatLessThanOrEqual(dialogue.startTime, time) && isFloatLessThan(time, dialogue.endTime);
 }
 
+// Consume Apple's API's via JSONP so that the requests don't get blocked by
+// CORS policy. This is suggested in Apple's docs:
+//   > Note: When creating search fields and scripts for your website, you should
+//   > use dynamic script tags for your xmlhttp script call requests. For example:
+//   > <script src="https://.../search?parameterkeyvalue&callback="{name of JavaScript function in webpage}"/>
+// From https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/
+let jsonpId = 0;
+function jsonpFetch(url: string, callbackParameterName: string): Promise<any> {
+  return new Promise(resolve => {
+    const callbackName = 'jsonpCallback' + jsonpId++;
+    const scriptEl = el('script', {
+      type: 'application/javascript',
+      src: url + callbackParameterName + '=' + callbackName,
+    });
+    window[callbackName] = json => {
+      document.head.removeChild(scriptEl);
+      delete window[callbackName];
+      resolve(json);
+    };
+    document.head.appendChild(scriptEl);
+  });
+}
+
 function lookupPodcast(podcastId: string): Promise<IApplePodcast> {
   const url = 'https://itunes.apple.com/lookup?id=' + encodeURIComponent(podcastId);
-  return fetch(url)
-    .then(response =>
-      response.json()
-    ).then(json =>
+  return jsonpFetch(url, '&callback')
+    .then(json =>
       json.results[0]
     );
 }
 
 function searchForPodcastEpisodes(query: string): Promise<{ resultCount: number; results: IAppleEpisode[] }> {
   const url = 'https://itunes.apple.com/search?media=podcast&entity=podcastEpisode&limit=10&term=' + encodeURIComponent(query);
-  return fetch(url)
-    .then(response =>
-      response.json()
-    );
+  return jsonpFetch(url, '&callback');
 }
 
 function setMessage(message: string) {
