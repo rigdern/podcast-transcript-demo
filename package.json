@@ -1,0 +1,16 @@
+{
+  "name": "podcast-transcript-demo",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "ts-watch": "tsc --watch",
+    "gh-pages": "tsc && node prepare-gh-pages.js"
+  },
+  "author": "",
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "autocompleter": "^6.1.0"
+  }
+}
