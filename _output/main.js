@@ -156,6 +156,17 @@ function parseTranscript(piTranscript, chapters) {
         else {
             const piSegment = value;
             const currentSegment = last(segments);
+            // Convert the timestamp to a number in case it's a string.
+            // Currently (8/17/21) Buzzsprout returns transcript timetamps as strings.
+            // Example:
+            //   - Transcript: https://feeds.buzzsprout.com/231452/8212589/transcript.json
+            //   - For episode: https://buzzcast.buzzsprout.com/231452/8212589-big-changes-coming-to-apple-podcasts-and-spotify
+            //
+            // This is inconsistent with the example from the Podcasting 2.0 spec where
+            // the transcript represents timestamps as numbers: https://github.com/Podcastindex-org/podcast-namespace/blob/00717cf44987dffe3ff648bc8ba7e25c81f35082/transcripts/example.json
+            // I reported the bug to Buzzsprout but I'm not sure when it'll be fixed.
+            // In the mean time this type conversion serves as a workaround.
+            piSegment.startTime = +piSegment.startTime;
             if (currentSegment !== undefined &&
                 currentSegment.type === 'speaker' &&
                 currentSegment.value.speaker === piSegment.speaker) {
