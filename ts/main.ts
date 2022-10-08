@@ -729,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ]),
       a({ href: 'https://github.com/rigdern/podcast-transcript-demo/blob/main/README.md', target: '_blank', style: 'margin-top: 5px;' }, [ text('About this Demo') ])
     ]),
-    div({ id: 'contentContainer', style: 'flex: 1; overflow: auto; display: flex; justify-content: center;' }, [ div({}, [ text('No episode loaded. Search for an episode to play.') ]) ]),
+    div({ id: 'contentContainer', style: 'flex: 1; overflow: auto; display: flex; justify-content: center; align-items: flex-start;' }, [ div({}, [ text('No episode loaded. Search for an episode to play.') ]) ]),
   ]);
 
   currentDialogue = undefined;
