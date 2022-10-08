@@ -684,7 +684,7 @@ let ahc: any;
 document.addEventListener('DOMContentLoaded', () => {
   player = audio({ controls: 'true', style: 'width: 100%;' });
   
-  searchEl = input({ type: 'search', placeholder: 'Search', style: 'width: 100%; max-width: 530px; margin-bottom: 5px;' });
+  searchEl = input({ type: 'search', placeholder: 'Search (/)', style: 'width: 100%; max-width: 530px; margin-bottom: 5px;' });
   autocomplete<IAppleEpisode>({
     input: searchEl,
     fetch: (text, update, trigger) => {
