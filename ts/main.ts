@@ -609,6 +609,11 @@ function updateContentDom(current: ICurrent) {
       ...(
         selectedTab === 'transcript' ? renderChaptersAndTranscript(current)
         : [
+            p({ style: 'font-weight: bold' }, [
+              text(current.podcast.title),
+              el('br'),
+              text(current.episode.title)
+            ]),
             p({}, [ text('Published ' + current.episode.publicationDate.toLocaleString()) ]),
             renderSanitizedHtml(current.episode.encoded || current.episode.description)
           ]
