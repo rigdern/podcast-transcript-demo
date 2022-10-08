@@ -73,6 +73,21 @@ function mapNodeList<TIn extends Node, TOut>(nodeList: NodeListOf<TIn>, callback
   return result;
 }
 
+function partitionWhen<T>(array: T[], fn: (item: T) => boolean) {
+  const result = [];
+
+  array.forEach(item => {
+    if (fn(item)) {
+      result.push([item]);
+    } else {
+      if (result.length === 0) result.push([]);
+      result[result.length - 1].push(item);
+    }
+  });
+
+  return result;
+}
+
 function getEpisodeByGuid(doc: Document, episodeGuid: string) {
   const it = doc.evaluate('.//channel/item/guid', doc, xmlNamespaceResolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
   for (let guidElement = it.iterateNext(); guidElement; guidElement = it.iterateNext()) {
@@ -326,7 +341,12 @@ function onClickSeekTo(time: number) {
 }
 
 function renderTranscriptChapter(chapter: IChapter) {
-  return el('h2', { id: 'chapter-' + chapter.index }, [ text(chapter.title) ]);
+  return (
+    el('h2', {
+      id: 'chapter-' + chapter.index,
+      style: 'position: sticky; top: -1px; background-color: lightgrey;',
+    }, [ text(chapter.title) ])
+  );
 }
 
 function renderTranscriptSpeaker(segment: ISegment) {
@@ -347,17 +367,16 @@ function renderTranscriptSpeaker(segment: ISegment) {
 
 function renderTranscript(transcript: ITranscriptWithSpeakersAndChapters) {
   if (transcript.segments.length > 0) {
-    return div({},
-      transcript.segments.map(segment => {
-        return (
-          segment.type === 'chapter' ? renderTranscriptChapter(segment.value)
-          : renderTranscriptSpeaker(segment.value)
-        );
-      })
-    );
-    } else {
-      return div({}, [ text('This episode does not include a transcript of type "application/json".') ]);
-    }
+    const segmentsGroupedByChapter = partitionWhen(transcript.segments, segment => segment.type === 'chapter');
+    return div({}, segmentsGroupedByChapter.map(group =>
+      div({}, group.map(segment =>
+        segment.type === 'chapter' ? renderTranscriptChapter(segment.value)
+        : renderTranscriptSpeaker(segment.value)
+      ))
+    ));
+  } else {
+    return div({}, [ text('This episode does not include a transcript of type "application/json".') ]);
+  }
 }
 
 function renderChapters(chapters: IChapters) {
